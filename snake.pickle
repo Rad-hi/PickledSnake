@@ -30,7 +30,6 @@
 ( def {prev_ts} 0.0 )
 ( def {now_ts} 0.0 )
 
-( def {game_over} false )
 
 ( def {over_msg} "GAME 0VER" )
 ( def {over_x} (/ CANVAS_WIDTH 4) )
@@ -44,33 +43,43 @@
 ( def {exit_x} (/ (- CANVAS_WIDTH 160 ) 2) )
 ( def {exit_y} (/ (+ CANVAS_HEIGHT (* 2 BIG_FONT_SZ)) 2) )
 
-( def {food_exists} false )
-( def {food_x} 0 )
-( def {food_y} 0 )
+( def {replay_msg} "press R to replay!" )
+( def {replay_x} (/ (- CANVAS_WIDTH 160 ) 2) )
+( def {replay_y} (/ (+ CANVAS_HEIGHT ( cast (* 3.5 BIG_FONT_SZ) Int)) 2) )
 
-( def {head_x} 0 )
-( def {head_y} 0 )
-( def {tail_x} 0 )
-( def {tail_y} 0 )
-( def {dir_x} 1.0 )  ;; [0/1] indicates whether we're moving in axis
-( def {dir_y} 0.0 )  ;; [+/-] indicates the direction
 
-( def {xs} ( list head_x ) )
-( def {ys} ( list head_y ) )
+( fn {reset _} {
+    ( def {game_over} false )
+
+    ( def {food_exists} false )
+    ( def {food_x} 0 )
+    ( def {food_y} 0 )
+
+    ( def {head_x} 0 )
+    ( def {head_y} 0 )
+    ( def {tail_x} 0 )
+    ( def {tail_y} 0 )
+    ( def {dir_x} 1 )  ;; [0/1] indicates whether we're moving in axis
+    ( def {dir_y} 0 )  ;; [+/-] indicates the direction
+
+    ( def {xs} ( list head_x ) )
+    ( def {ys} ( list head_y ) )
+
+})
 
 
 ( fn {check_key_presses _} {
     ;; TODO: use `GetKeyPressed` to read all the queued key presses and update one at a time
-    ( if (and (== (IsKeyPressed KEY_RIGHT) 1) (> dir_x -1.0)) { ( def {dir_x} (+ 1.0) ) ( def {dir_y} 0.0 ) } { nil } )
-    ( if (and (== (IsKeyPressed KEY_LEFT) 1) (< dir_x 1.0)) { ( def {dir_x} (- 1.0) ) ( def {dir_y} 0.0 ) } { nil } )
-    ( if (and (== (IsKeyPressed KEY_DOWN) 1) (> dir_y -1.0)) { ( def {dir_y} (+ 1.0) ) ( def {dir_x} 0.0 ) } { nil } )
-    ( if (and (== (IsKeyPressed KEY_UP) 1) (< dir_y 1.0)) { ( def {dir_y} (- 1.0) ) ( def {dir_x} 0.0 ) } { nil } )
+    ( if (and (== (IsKeyPressed KEY_RIGHT) 1) (> dir_x -1)) { ( def {dir_x} (+ 1) ) ( def {dir_y} 0 ) } { nil } )
+    ( if (and (== (IsKeyPressed KEY_LEFT) 1) (< dir_x 1)) { ( def {dir_x} (- 1) ) ( def {dir_y} 0 ) } { nil } )
+    ( if (and (== (IsKeyPressed KEY_DOWN) 1) (> dir_y -1)) { ( def {dir_y} (+ 1) ) ( def {dir_x} 0 ) } { nil } )
+    ( if (and (== (IsKeyPressed KEY_UP) 1) (< dir_y 1)) { ( def {dir_y} (- 1) ) ( def {dir_x} 0 ) } { nil } )
 })
 
 
 ( fn { step _ } {
-    (= {step_x} ( cast (* CELL_W dir_x) Int ))
-    (= {step_y} ( cast (* CELL_H dir_y) Int ))
+    (= {step_x} (* CELL_W dir_x))
+    (= {step_y} (* CELL_H dir_y))
     ( def {head_x} (+ head_x step_x) )
     ( def {head_y} (+ head_y step_y) )
     ( def {tail_x} ( st xs ) )
@@ -148,11 +157,18 @@
             ( DrawRectangleLines 1 1 (- CANVAS_WIDTH 1) (- CANVAS_HEIGHT 1) TXT_COLOR )
 
             ( if ( game_over )
-                {
-                    ( DrawText over_msg over_x over_y BIG_FONT_SZ TXT_COLOR )
-                    ( DrawText exit_msg exit_x exit_y SML_FONT_SZ TXT_COLOR )
-                    ; TODO: ask for rematch
-                }
+                {(
+                    if (== ( IsKeyPressed KEY_R ) 1) 
+                    {
+                        ( ClearBackground BG_COLOR )
+                        ( reset {} )
+                    }
+                    {
+                        ( DrawText over_msg over_x over_y BIG_FONT_SZ TXT_COLOR )
+                        ( DrawText exit_msg exit_x exit_y SML_FONT_SZ TXT_COLOR )
+                        ( DrawText replay_msg replay_x replay_y SML_FONT_SZ TXT_COLOR )
+                    }
+                )}
                 {
                     ( is_over {} )
 
@@ -192,6 +208,7 @@
 })
 
 
+( reset {} )
 ( InitWindow WIN_WIDTH WIN_HEIGHT TITLE )
 ( ClearBackground BG_COLOR )
 ( SetTargetFPS FPS )
