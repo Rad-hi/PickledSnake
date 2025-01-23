@@ -17,7 +17,7 @@
 ( extern raylib "WaitTime" {Double} {Void})  ;; Wait for some time (halt program execution)
 ( extern raylib "GetRandomValue" {Int Int} {Int} )
 
-( def {KEY_R}     82)
+( def {KEY_R}     82 )
 ( def {KEY_RIGHT} 262 )
 ( def {KEY_LEFT}  263 )
 ( def {KEY_DOWN}  264 )

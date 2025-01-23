@@ -14,7 +14,7 @@
 ( def {BIG_FONT_SZ} 32 )
 ( def {SML_FONT_SZ} 18 )
 
-( def {FPS} 30 )
+( def {FPS} 60 )
 ( def {TITLE} "PickledSnake" )
 ( def {WIN_WIDTH} 440 )
 ( def {WIN_HEIGHT} 400 )
@@ -26,7 +26,7 @@
 ( def {CELL_W} (/ CANVAS_WIDTH N_COLS))
 ( def {CELL_H} (/ CANVAS_HEIGHT N_ROWS))
 
-( def {step_dt} .2 )  ;; [sec] smaller -> faster snake
+( def {step_dt} .15 )  ;; [sec] smaller -> faster snake
 ( def {prev_ts} 0.0 )
 ( def {now_ts} 0.0 )
 
@@ -69,11 +69,16 @@
 
 
 ( fn {check_key_presses _} {
+    (= {dx} dir_x)  ;; take copies of the directions for conditionals
+    (= {dy} dir_y)
+
+    ;; TODO: there's a weird "heisenbug" that causes the snake to go over its body, 
+    ;; and I am suspecting it's in here
     ;; TODO: use `GetKeyPressed` to read all the queued key presses and update one at a time
-    ( if (and (== (IsKeyPressed KEY_RIGHT) 1) (> dir_x -1)) { ( def {dir_x} (+ 1) ) ( def {dir_y} 0 ) } { nil } )
-    ( if (and (== (IsKeyPressed KEY_LEFT) 1) (< dir_x 1)) { ( def {dir_x} (- 1) ) ( def {dir_y} 0 ) } { nil } )
-    ( if (and (== (IsKeyPressed KEY_DOWN) 1) (> dir_y -1)) { ( def {dir_y} (+ 1) ) ( def {dir_x} 0 ) } { nil } )
-    ( if (and (== (IsKeyPressed KEY_UP) 1) (< dir_y 1)) { ( def {dir_y} (- 1) ) ( def {dir_x} 0 ) } { nil } )
+    ( if (and (== (IsKeyPressed KEY_DOWN) 1)  (> dy -1)) { ( def {dir_y} 1 ) ( def {dir_x} 0 ) } { nil } )
+    ( if (and (== (IsKeyPressed KEY_UP) 1)    (< dy 1)) { ( def {dir_y} -1 ) ( def {dir_x} 0 ) } { nil } )
+    ( if (and (== (IsKeyPressed KEY_RIGHT) 1) (> dx -1)) { ( def {dir_x} 1 ) ( def {dir_y} 0 ) } { nil } )
+    ( if (and (== (IsKeyPressed KEY_LEFT) 1)  (< dx 1)) { ( def {dir_x} -1 ) ( def {dir_y} 0 ) } { nil } )
 })
 
 
@@ -106,7 +111,7 @@
     (= {x} (* CELL_W ( GetRandomValue 0 (- N_COLS 1) )) )
     (= {y} (* CELL_H ( GetRandomValue 0 (- N_ROWS 1) )) )
     (
-        if (and (not (in x xs)) (not (in y ys)))
+        if (not ( xy_in_xsys x y xs ys))
         {( def {food_x} x ) ( def {food_y} y )}
         {( spawn_food {} )}  ;; TODO: do better! might (will) produce an infinite loop
     )
@@ -114,13 +119,13 @@
 })
 
 
-( fn {is_self_collision xs_ ys_} {
+( fn {xy_in_xsys x_ y_ xs_ ys_} {
     if (== xs_ nil)
     {false}
     {
-        if (and (== head_x (st xs_)) (== head_y (st ys_))) 
+        if (and (== x_ (st xs_)) (== y_ (st ys_))) 
         {true}
-        {is_self_collision (tail xs_) (tail ys_)}
+        {xy_in_xsys x_ y_ (tail xs_) (tail ys_)}
     }
 })
 
@@ -131,16 +136,12 @@
                               (or (>= head_y CANVAS_HEIGHT) (< head_y 0)))
     )
 
-    (= {dacapitated_len} (- ( len xs ) 1) )
-    (= {dacapitated_xs} ( take dacapitated_len xs ) )
-    (= {dacapitated_ys} ( take dacapitated_len ys ) )
-    (
-        if (or out_of_bounds ( is_self_collision dacapitated_xs dacapitated_ys ))
-        {
-            ( def {game_over} true )
-        }
-        { nil }
-    )
+    (= {body_len} (- ( len xs ) 1) )
+    (= {dacapitated_xs} ( take body_len xs ) )
+    (= {dacapitated_ys} ( take body_len ys ) )
+    (= {self_collision} ( xy_in_xsys head_x head_y dacapitated_xs dacapitated_ys ) )
+
+    ( if (or out_of_bounds self_collision) {( def {game_over} true )} { nil } )
 })
 
 
@@ -157,8 +158,8 @@
             ( DrawRectangleLines 1 1 (- CANVAS_WIDTH 1) (- CANVAS_HEIGHT 1) TXT_COLOR )
 
             ( if ( game_over )
-                {(
-                    if (== ( IsKeyPressed KEY_R ) 1) 
+                {
+                    ( if (== ( IsKeyPressed KEY_R ) 1) 
                     {
                         ( ClearBackground BG_COLOR )
                         ( reset {} )
@@ -167,8 +168,8 @@
                         ( DrawText over_msg over_x over_y BIG_FONT_SZ TXT_COLOR )
                         ( DrawText exit_msg exit_x exit_y SML_FONT_SZ TXT_COLOR )
                         ( DrawText replay_msg replay_x replay_y SML_FONT_SZ TXT_COLOR )
-                    }
-                )}
+                    })
+                }
                 {
                     ( is_over {} )
 
