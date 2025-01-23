@@ -1,6 +1,8 @@
 (dll "raylib" "./thirdparty/raylib-5.5_linux_amd64/lib/libraylib.so")
 
+
 ( mktype "Color" {Char Char Char Char} )
+( mktype "Rectangle" {Float Float Float Float} )  ;; [X Y W H] -- top left corner, width, height
 
 ( extern raylib "InitWindow" {Int Int String} {Void} )
 ( extern raylib "WindowShouldClose" {Void} {Int} )
@@ -14,11 +16,22 @@
 ( extern raylib "DrawRectangleLines" {Int  Int  Int  Int  Color} {Void} )  ;; [X Y W H] -- Draw rectangle outline
 ( extern raylib "IsKeyPressed" {Int} {Int} )
 ( extern raylib "GetTime" {Void} {Double} )  ;; Get elapsed time in seconds since InitWindow()
-( extern raylib "WaitTime" {Double} {Void})  ;; Wait for some time (halt program execution)
 ( extern raylib "GetRandomValue" {Int Int} {Int} )
+( extern raylib "DrawRectangleRounded" {Rectangle Float Int Color} {Void} )  ;; Draw rectangle with rounded edges
 
 ( def {KEY_R}     82 )
 ( def {KEY_RIGHT} 262 )
 ( def {KEY_LEFT}  263 )
 ( def {KEY_DOWN}  264 )
 ( def {KEY_UP}    265 )
+
+
+( extern raylib "SetTraceLogLevel" {Int} {Void} )
+( def {LOG_ALL} 0 )
+( def {LOG_TRACE} 1 )
+( def {LOG_DEBUG} 2 )
+( def {LOG_INFO} 3 )
+( def {LOG_WARNING} 4 )
+( def {LOG_ERROR} 5 )
+( def {LOG_FATAL} 6 )
+( def {LOG_NONE} 7 )

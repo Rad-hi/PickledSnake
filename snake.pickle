@@ -158,50 +158,53 @@
             ( DrawRectangleLines 1 1 (- CANVAS_WIDTH 1) (- CANVAS_HEIGHT 1) TXT_COLOR )
 
             ( if ( game_over )
+            {
+                ( if (== ( IsKeyPressed KEY_R ) 1)
                 {
-                    ( if (== ( IsKeyPressed KEY_R ) 1) 
+                    ( ClearBackground BG_COLOR )
+                    ( reset {} )
+                }
+                {
+                    ( DrawText over_msg over_x over_y BIG_FONT_SZ TXT_COLOR )
+                    ( DrawText exit_msg exit_x exit_y SML_FONT_SZ TXT_COLOR )
+                    ( DrawText replay_msg replay_x replay_y SML_FONT_SZ TXT_COLOR )
+                })
+            }
+            {
+                ( is_over {} )
+
+                ;; the length of the snake represents the score
+                ( let {
+                    (= {score_str} ( cast ( len xs ) String ))
+                    (= {x} (+ CANVAS_WIDTH 10))
+                    (= {y} 10)
+                    (= {pad} 5)
+                    ( DrawRectangle x y CELL_W CELL_H BG_COLOR )
+                    ( DrawText score_str (+ x pad) (+ y pad) SML_FONT_SZ TXT_COLOR )
+                })
+
+                ( if (food_exists)
+                    { nil }
                     {
-                        ( ClearBackground BG_COLOR )
-                        ( reset {} )
+                        ( DrawRectangle food_x food_y CELL_W CELL_H BG_COLOR )
+                        ( spawn_food {} )
+                        ( DrawRectangle food_x food_y CELL_W CELL_H FOOD_COLOR )
                     }
-                    {
-                        ( DrawText over_msg over_x over_y BIG_FONT_SZ TXT_COLOR )
-                        ( DrawText exit_msg exit_x exit_y SML_FONT_SZ TXT_COLOR )
-                        ( DrawText replay_msg replay_x replay_y SML_FONT_SZ TXT_COLOR )
-                    })
-                }
-                {
-                    ( is_over {} )
+                )
 
-                    ;; the length of the snake represents the score
-                    ( let {
-                        (= {score_str} ( cast ( len xs ) String ))
-                        (= {x} (+ CANVAS_WIDTH 10))
-                        (= {y} 10)
-                        (= {pad} 5)
-                        ( DrawRectangle x y CELL_W CELL_H BG_COLOR )
-                        ( DrawText score_str (+ x pad) (+ y pad) SML_FONT_SZ TXT_COLOR )
-                    })
+                ;; minimizing the rectangles to be drawn by only drawing the head and tail
+                ;; has a side effect of a shadow background colored box
+                ;; (could be seen when "walking" on the walls)
+                ( DrawRectangle tail_x tail_y CELL_W CELL_H BG_COLOR )
+                ( DrawRectangle head_x head_y CELL_W CELL_H SNAKE_COLOR )
 
-                    ( if (food_exists)
-                        { nil }
-                        {
-                            ( DrawRectangle food_x food_y CELL_W CELL_H BG_COLOR )
-                            ( spawn_food {} )
-                            ( DrawRectangle food_x food_y CELL_W CELL_H FOOD_COLOR )
-                        }
-                    )
+                ;; (= {rec} ( list ( cast head_x Float ) ( cast head_y Float ) ( cast CELL_W Float ) ( cast CELL_H Float ) ) )
+                ;; ( DrawRectangleRounded rec 5. 0 )
+                ;; ( DrawCircleV (list 20.0 30.0) 15. MYPINK )
 
-                    ;; minimizing the rectangles to be drawn by only drawing the head and tail
-                    ;; has a side effect of a shadow background colored box
-                    ;; (could be seen when "walking" on the walls)
-                    ( DrawRectangle tail_x tail_y CELL_W CELL_H BG_COLOR )
-                    ( DrawRectangle head_x head_y CELL_W CELL_H SNAKE_COLOR )
-
-                    ( if (>= (- now_ts prev_ts) step_dt ) {( step {} )} { nil } )
-                    ( check_key_presses {} )
-                }
-            )
+                ( if (>= (- now_ts prev_ts) step_dt ) {( step {} )} { nil } )
+                ( check_key_presses {} )
+            })
 
         ( EndDrawing {} )
         ( loop func )
@@ -209,6 +212,7 @@
 })
 
 
+( SetTraceLogLevel LOG_NONE )
 ( reset {} )
 ( InitWindow WIN_WIDTH WIN_HEIGHT TITLE )
 ( ClearBackground BG_COLOR )
