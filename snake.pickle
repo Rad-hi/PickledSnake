@@ -26,9 +26,9 @@
 ( def {CELL_W} (/ CANVAS_WIDTH N_COLS))
 ( def {CELL_H} (/ CANVAS_HEIGHT N_ROWS))
 
-( def {step_dt} .15 )  ;; [sec] smaller -> faster snake
-( def {prev_ts} 0.0 )
-( def {now_ts} 0.0 )
+( def {step_dt} 0.15f )  ;; [sec] smaller -> faster snake
+( def {prev_ts} 0.00f )
+( def {now_ts}  0.00f )
 
 
 ( def {over_msg} "GAME 0VER" )
@@ -46,6 +46,12 @@
 ( def {replay_msg} "press R to replay!" )
 ( def {replay_x} (/ (- CANVAS_WIDTH 160 ) 2) )
 ( def {replay_y} (/ (+ CANVAS_HEIGHT ( cast (* 3.5 BIG_FONT_SZ) Int)) 2) )
+
+( def {SCORE_X} (+ CANVAS_WIDTH 10) )
+( def {SCORE_Y} 10 )
+
+( def {FPS_X} (+ CANVAS_WIDTH 5) )
+( def {FPS_Y} ( cast (* .92 CANVAS_HEIGHT) Int ) )
 
 
 ( fn {reset _} {
@@ -68,17 +74,19 @@
 })
 
 
-( fn {check_key_presses _} {
-    (= {dx} dir_x)  ;; take copies of the directions for conditionals
-    (= {dy} dir_y)
+( fn {check_key_presses dx dy} {
 
-    ;; TODO: there's a weird "heisenbug" that causes the snake to go over its body, 
-    ;; and I am suspecting it's in here
-    ;; TODO: use `GetKeyPressed` to read all the queued key presses and update one at a time
-    ( if (and (== (IsKeyPressed KEY_DOWN) 1)  (> dy -1)) { ( def {dir_y} 1 ) ( def {dir_x} 0 ) } { nil } )
-    ( if (and (== (IsKeyPressed KEY_UP) 1)    (< dy 1)) { ( def {dir_y} -1 ) ( def {dir_x} 0 ) } { nil } )
-    ( if (and (== (IsKeyPressed KEY_RIGHT) 1) (> dx -1)) { ( def {dir_x} 1 ) ( def {dir_y} 0 ) } { nil } )
-    ( if (and (== (IsKeyPressed KEY_LEFT) 1)  (< dx 1)) { ( def {dir_x} -1 ) ( def {dir_y} 0 ) } { nil } )
+    (= {key} ( GetKeyPressed {} ))
+    ( if (== key KEY_NULL)
+        { nil }
+        {
+            ( if (and (== key KEY_DOWN)  (> dy -1)) { ( def {dir_y} 1 )  ( def {dir_x} 0 ) } { nil } )
+            ( if (and (== key KEY_UP)    (< dy 1))  { ( def {dir_y} -1 ) ( def {dir_x} 0 ) } { nil } )
+            ( if (and (== key KEY_RIGHT) (> dx -1)) { ( def {dir_x} 1 )  ( def {dir_y} 0 ) } { nil } )
+            ( if (and (== key KEY_LEFT)  (< dx 1))  { ( def {dir_x} -1 ) ( def {dir_y} 0 ) } { nil } )
+            ( check_key_presses dx dy )
+        }
+    )
 })
 
 
@@ -175,12 +183,17 @@
 
                 ;; the length of the snake represents the score
                 ( let {
+                    ( DrawRectangle SCORE_X SCORE_Y CELL_W CELL_H BG_COLOR )
                     (= {score_str} ( cast ( len xs ) String ))
-                    (= {x} (+ CANVAS_WIDTH 10))
-                    (= {y} 10)
-                    (= {pad} 5)
-                    ( DrawRectangle x y CELL_W CELL_H BG_COLOR )
-                    ( DrawText score_str (+ x pad) (+ y pad) SML_FONT_SZ TXT_COLOR )
+                    ( DrawText score_str (+ SCORE_X 5) (+ SCORE_Y 5) SML_FONT_SZ TXT_COLOR )
+                })
+
+                ( let {
+                    ( DrawRectangle FPS_X FPS_Y (* 2 CELL_W) (* 2 CELL_H) BG_COLOR )
+                    ( DrawText "FPS" FPS_X (- FPS_Y 12) SML_FONT_SZ TXT_COLOR )
+                    (= {fps_str} ( cast ( GetFPS {} ) String ))
+                    ( DrawText fps_str (+ FPS_X 5) (+ FPS_Y 5) SML_FONT_SZ TXT_COLOR )
+                    ;; ( DrawFPS (+ FPS_X 5) (+ FPS_Y 5) )
                 })
 
                 ( if (food_exists)
@@ -202,8 +215,8 @@
                 ;; ( DrawRectangleRounded rec 5. 0 )
                 ;; ( DrawCircleV (list 20.0 30.0) 15. MYPINK )
 
-                ( if (>= (- now_ts prev_ts) step_dt ) {( step {} )} { nil } )
-                ( check_key_presses {} )
+                ( if (>= (- now_ts prev_ts) step_dt ) {( step {} ) } { nil } )
+                ( check_key_presses dir_x dir_y )
             })
 
         ( EndDrawing {} )

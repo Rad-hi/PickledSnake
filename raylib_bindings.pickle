@@ -1,24 +1,32 @@
-(dll "raylib" "./thirdparty/raylib-5.5_linux_amd64/lib/libraylib.so")
+( dll "raylib" "./thirdparty/raylib-5.5_linux_amd64/lib/libraylib.so" )
 
 
 ( mktype "Color" {Char Char Char Char} )
 ( mktype "Rectangle" {Float Float Float Float} )  ;; [X Y W H] -- top left corner, width, height
+
 
 ( extern raylib "InitWindow" {Int Int String} {Void} )
 ( extern raylib "WindowShouldClose" {Void} {Int} )
 ( extern raylib "BeginDrawing" {Void} {Void} )
 ( extern raylib "EndDrawing" {Void} {Void} )
 ( extern raylib "CloseWindow" {Void} {Void} )
-( extern raylib "ClearBackground" {Color} {Void} )
 ( extern raylib "SetTargetFPS" {Int} {Void} )
+( extern raylib "ClearBackground" {Color} {Void} )
+
+( extern raylib "GetTime" {Void} {Double} )  ;; Get elapsed time in seconds since InitWindow()
+( extern raylib "GetFPS" {Void} {Int} )
+( extern raylib "GetRandomValue" {Int Int} {Int} )
+
 ( extern raylib "DrawText" {String Int Int Int Color} {Void} )
 ( extern raylib "DrawRectangle" {Int  Int  Int  Int  Color} {Void} )  ;; [X Y W H] -- Draw color filled rectangle
 ( extern raylib "DrawRectangleLines" {Int  Int  Int  Int  Color} {Void} )  ;; [X Y W H] -- Draw rectangle outline
-( extern raylib "IsKeyPressed" {Int} {Int} )
-( extern raylib "GetTime" {Void} {Double} )  ;; Get elapsed time in seconds since InitWindow()
-( extern raylib "GetRandomValue" {Int Int} {Int} )
 ( extern raylib "DrawRectangleRounded" {Rectangle Float Int Color} {Void} )  ;; Draw rectangle with rounded edges
+( extern raylib "DrawFPS" {Int Int} {Void} )
 
+
+( extern raylib "IsKeyPressed" {Int} {Int} )
+( extern raylib "GetKeyPressed" {Void} {Int} )  ;; Get key pressed (keycode), call it multiple times for keys queued, returns 0 when the queue is empty
+( def {KEY_NULL}  0)
 ( def {KEY_R}     82 )
 ( def {KEY_RIGHT} 262 )
 ( def {KEY_LEFT}  263 )
@@ -27,11 +35,11 @@
 
 
 ( extern raylib "SetTraceLogLevel" {Int} {Void} )
-( def {LOG_ALL} 0 )
-( def {LOG_TRACE} 1 )
-( def {LOG_DEBUG} 2 )
-( def {LOG_INFO} 3 )
+( def {LOG_ALL}     0 )
+( def {LOG_TRACE}   1 )
+( def {LOG_DEBUG}   2 )
+( def {LOG_INFO}    3 )
 ( def {LOG_WARNING} 4 )
-( def {LOG_ERROR} 5 )
-( def {LOG_FATAL} 6 )
-( def {LOG_NONE} 7 )
+( def {LOG_ERROR}   5 )
+( def {LOG_FATAL}   6 )
+( def {LOG_NONE}    7 )
