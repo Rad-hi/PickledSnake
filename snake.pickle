@@ -201,7 +201,8 @@
                     {
                         ( DrawRectangle food_x food_y CELL_W CELL_H BG_COLOR )
                         ( spawn_food {} )
-                        ( DrawRectangle food_x food_y CELL_W CELL_H FOOD_COLOR )
+                        (= {vec} ( list ( cast (+ food_x (/ CELL_W 2)) Float) ( cast (+ food_y (/ CELL_H 2)) Float ) ) )
+                        ( DrawCircleV vec 8. FOOD_COLOR )
                     }
                 )
 
@@ -209,11 +210,9 @@
                 ;; has a side effect of a shadow background colored box
                 ;; (could be seen when "walking" on the walls)
                 ( DrawRectangle tail_x tail_y CELL_W CELL_H BG_COLOR )
-                ( DrawRectangle head_x head_y CELL_W CELL_H SNAKE_COLOR )
 
-                ;; (= {rec} ( list ( cast head_x Float ) ( cast head_y Float ) ( cast CELL_W Float ) ( cast CELL_H Float ) ) )
-                ;; ( DrawRectangleRounded rec 5. 0 )
-                ;; ( DrawCircleV (list 20.0 30.0) 15. MYPINK )
+                (= {rec} ( list ( cast head_x Float ) ( cast head_y Float ) ( cast CELL_W Float ) ( cast CELL_H Float ) ) )
+                ( DrawRectangleRounded rec .4 3 SNAKE_COLOR )
 
                 ( if (>= (- now_ts prev_ts) step_dt ) {( step {} ) } { nil } )
                 ( check_key_presses dir_x dir_y )

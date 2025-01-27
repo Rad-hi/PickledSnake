@@ -3,6 +3,7 @@
 
 ( mktype "Color" {Char Char Char Char} )
 ( mktype "Rectangle" {Float Float Float Float} )  ;; [X Y W H] -- top left corner, width, height
+( mktype "Vector2" {Float Float} )
 
 
 ( extern raylib "InitWindow" {Int Int String} {Void} )
@@ -22,6 +23,7 @@
 ( extern raylib "DrawRectangleLines" {Int  Int  Int  Int  Color} {Void} )  ;; [X Y W H] -- Draw rectangle outline
 ( extern raylib "DrawRectangleRounded" {Rectangle Float Int Color} {Void} )  ;; Draw rectangle with rounded edges
 ( extern raylib "DrawFPS" {Int Int} {Void} )
+( extern raylib "DrawCircleV" {Vector2 Float Color} {Void} )
 
 
 ( extern raylib "IsKeyPressed" {Int} {Int} )
