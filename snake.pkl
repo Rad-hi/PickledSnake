@@ -1,6 +1,6 @@
 ;; I recommend a Lisp mode for your LSP for minimal text highlighting 
 
-( load "./raylib_bindings.pickle" )
+( load "./raylib_bindings.pkl" )
 
 ( def {ZOZINGRAY}    (list 22 22 22 255) )
 ( def {RAYWHITE}     (list 245 245 245 255) )
